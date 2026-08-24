@@ -1,0 +1,80 @@
+"""Aggregate read queries for the admin dashboard: counts, sales, top rankings."""
+
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.catalog.models import Product
+from app.core.pagination import PageParams
+from app.orders.models import Order, OrderItem, OrderStatus, SubOrder
+from app.vendors.models import Vendor, VendorStatus
+
+
+async def count_vendors_by_status(db: AsyncSession) -> dict[str, int]:
+    stmt = select(Vendor.status, func.count()).group_by(Vendor.status)
+    counts = {status.value: 0 for status in VendorStatus}
+    for status, count in (await db.execute(stmt)).all():
+        counts[status.value] = count
+    return counts
+
+
+async def count_products(db: AsyncSession) -> int:
+    return (await db.execute(select(func.count()).select_from(Product))).scalar_one()
+
+
+async def count_orders_by_status(db: AsyncSession) -> dict[str, int]:
+    stmt = select(Order.status, func.count()).group_by(Order.status)
+    counts = {status.value: 0 for status in OrderStatus}
+    for status, count in (await db.execute(stmt)).all():
+        counts[status.value] = count
+    return counts
+
+
+async def sum_sales_and_commission(db: AsyncSession) -> tuple[int, int]:
+    stmt = select(
+        func.coalesce(func.sum(SubOrder.amount), 0), func.coalesce(func.sum(SubOrder.commission), 0)
+    ).where(SubOrder.status == OrderStatus.DELIVERED)
+    total_sales, total_commission = (await db.execute(stmt)).one()
+    return int(total_sales), int(total_commission)
+
+
+async def top_products(db: AsyncSession, limit: int = 5) -> list[tuple]:
+    stmt = (
+        select(OrderItem.product_id, OrderItem.product_name, func.sum(OrderItem.quantity))
+        .join(SubOrder, OrderItem.sub_order_id == SubOrder.id)
+        .where(SubOrder.status == OrderStatus.DELIVERED)
+        .group_by(OrderItem.product_id, OrderItem.product_name)
+        .order_by(func.sum(OrderItem.quantity).desc())
+        .limit(limit)
+    )
+    return list((await db.execute(stmt)).all())
+
+
+async def top_vendors(db: AsyncSession, limit: int = 5) -> list[tuple]:
+    stmt = (
+        select(SubOrder.vendor_id, SubOrder.shop_name, func.sum(SubOrder.amount))
+        .where(SubOrder.status == OrderStatus.DELIVERED)
+        .group_by(SubOrder.vendor_id, SubOrder.shop_name)
+        .order_by(func.sum(SubOrder.amount).desc())
+        .limit(limit)
+    )
+    return list((await db.execute(stmt)).all())
+
+
+async def list_all_orders(
+    db: AsyncSession, params: PageParams, status_filter: OrderStatus | None
+) -> tuple[list[Order], int]:
+    base_stmt = select(Order)
+    if status_filter is not None:
+        base_stmt = base_stmt.where(Order.status == status_filter)
+
+    total = (await db.execute(select(func.count()).select_from(base_stmt.subquery()))).scalar_one()
+
+    stmt = (
+        base_stmt.options(selectinload(Order.sub_orders).selectinload(SubOrder.items))
+        .order_by(Order.created_at.desc())
+        .offset(params.offset)
+        .limit(params.page_size)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all()), total

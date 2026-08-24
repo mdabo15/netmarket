@@ -1,0 +1,59 @@
+import type { FetchOptions } from 'ofetch'
+import type { ApiError } from '~/types/api'
+
+/**
+ * Authenticated API client: attaches the current access token, and on a 401
+ * transparently retries once after a token refresh (see stores/auth.ts).
+ *
+ * Any 401 that can't be resolved by that refresh — no refresh token to try,
+ * or the refresh itself fails — always sends the user to /connexion. Before
+ * this, a 401 with no refresh token fell straight through to `throw error`
+ * with no redirect at all: the calling page's useAsyncData swallows that
+ * into a silent `.error`, so the user was left looking at a blank/broken
+ * page with no indication they needed to log back in.
+ */
+export function useApi() {
+  const apiBase = useApiBase()
+  const auth = useAuthStore()
+  const route = useRoute()
+  const nuxtApp = useNuxtApp()
+
+  async function redirectToLogin() {
+    auth.logout()
+    // navigateTo() reads the current Nuxt instance — safe here only because
+    // we grabbed `nuxtApp` synchronously above. Called bare, this runs after
+    // the `await`s in apiFetch's catch block below, by which point that
+    // implicit context is gone (NUXT_E1001), and useAsyncData quietly turns
+    // that context error into the page's own error instead of redirecting.
+    await nuxtApp.runWithContext(() => navigateTo({ path: '/connexion', query: { redirect: route.fullPath } }))
+  }
+
+  async function apiFetch<T>(path: string, options: FetchOptions<'json'> = {}, _retried = false): Promise<T> {
+    const headers = new Headers(options.headers as HeadersInit | undefined)
+    if (auth.accessToken) headers.set('Authorization', `Bearer ${auth.accessToken}`)
+
+    try {
+      return await $fetch<T>(path, {
+        baseURL: apiBase,
+        ...options,
+        headers,
+      })
+    } catch (error) {
+      const status = (error as { response?: { status?: number } })?.response?.status
+      if (status === 401 && !_retried) {
+        const refreshed = auth.refreshToken ? await auth.tryRefresh() : false
+        if (refreshed) return apiFetch<T>(path, options, true)
+        await redirectToLogin()
+      }
+      throw error
+    }
+  }
+
+  return { apiFetch }
+}
+
+/** Extracts the French error message the backend puts in {"detail": "..."}. */
+export function apiErrorMessage(error: unknown, fallback = 'Une erreur est survenue. Veuillez réessayer.'): string {
+  const data = (error as { data?: ApiError })?.data
+  return data?.detail || fallback
+}

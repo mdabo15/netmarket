@@ -1,0 +1,34 @@
+"""Admin dashboard: platform-wide statistics and global order visibility.
+
+Vendor validation lives in app/vendors/router.py (admin_router, under
+/admin/vendors) since it's vendor-specific business logic; this module covers
+the cross-cutting concerns (stats, global order list).
+"""
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.admin import service
+from app.admin.schemas import AdminStats
+from app.core.deps import get_db, require_role
+from app.core.pagination import Page, PageParams, pagination_params
+from app.orders.models import OrderStatus
+from app.orders.schemas import OrderRead
+from app.users.models import UserRole
+
+router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_role(UserRole.ADMIN))])
+
+
+@router.get("/stats", response_model=AdminStats)
+async def get_stats(db: AsyncSession = Depends(get_db)) -> AdminStats:
+    return await service.get_stats(db)
+
+
+@router.get("/orders", response_model=Page[OrderRead])
+async def list_orders(
+    status_filter: OrderStatus | None = Query(default=None, alias="status"),
+    params: PageParams = Depends(pagination_params),
+    db: AsyncSession = Depends(get_db),
+) -> Page[OrderRead]:
+    items, total = await service.list_orders(db, params, status_filter)
+    return Page.create(items=items, total=total, params=params)

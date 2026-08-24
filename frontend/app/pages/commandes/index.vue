@@ -1,0 +1,68 @@
+<script setup lang="ts">
+import type { OrderRead } from '~/types/api'
+
+definePageMeta({ middleware: 'auth' })
+
+const { apiFetch } = useApi()
+
+const { data: orders, pending } = await useAsyncData('my-orders', () => apiFetch<OrderRead[]>('/orders'), {
+  default: () => [],
+})
+
+const tab = ref<'ongoing' | 'done'>('ongoing')
+
+const ongoing = computed(() => orders.value.filter((o) => !['delivered', 'cancelled'].includes(o.status)))
+const done = computed(() => orders.value.filter((o) => ['delivered', 'cancelled'].includes(o.status)))
+const visible = computed(() => (tab.value === 'ongoing' ? ongoing.value : done.value))
+
+function vendorCount(order: OrderRead) {
+  return order.sub_orders.length
+}
+function itemCount(order: OrderRead) {
+  return order.sub_orders.reduce((sum, so) => sum + so.items.reduce((s, i) => s + i.quantity, 0), 0)
+}
+function shortId(id: string) {
+  return `#GN-${id.slice(0, 5).toUpperCase()}`
+}
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+</script>
+
+<template>
+  <div class="app-shell pa-4" style="padding-bottom: 76px">
+    <h1 class="text-h6 mb-3">Mes commandes</h1>
+
+    <v-btn-toggle v-model="tab" mandatory density="comfortable" divided class="mb-4">
+      <v-btn value="ongoing">En cours</v-btn>
+      <v-btn value="done">Terminées</v-btn>
+    </v-btn-toggle>
+
+    <CommonEmptyState v-if="!pending && visible.length === 0" message="Aucune commande ici pour le moment." />
+
+    <NuxtLink v-for="order in visible" :key="order.id" :to="`/commandes/${order.id}`" class="order-row">
+      <div class="d-flex justify-space-between align-center">
+        <span style="font-weight: 600">{{ shortId(order.id) }}</span>
+        <StatusBadge :status="order.status" />
+      </div>
+      <div class="text-muted mt-1" style="font-size: 12px">
+        {{ formatDate(order.created_at) }} · {{ itemCount(order) }} article{{ itemCount(order) > 1 ? 's' : '' }} ·
+        {{ vendorCount(order) }} boutique{{ vendorCount(order) > 1 ? 's' : '' }}
+      </div>
+      <div class="d-flex justify-space-between mt-1">
+        <span class="text-muted" style="font-size: 12.5px">Total</span>
+        <span style="font-size: 13px">{{ formatGnf(order.total) }}</span>
+      </div>
+    </NuxtLink>
+  </div>
+</template>
+
+<style scoped>
+.order-row {
+  display: block;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-divider);
+  text-decoration: none;
+  color: inherit;
+}
+</style>

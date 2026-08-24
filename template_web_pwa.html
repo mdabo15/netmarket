@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/nocturne-a6f23ad6-70af-4ff8-a7b9-8c40943630d3/styles.css">
+  <script src="_ds/nocturne-a6f23ad6-70af-4ff8-a7b9-8c40943630d3/_ds_bundle.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.0.3/src/regular/style.css">
+  <script src="./image-slot.js"></script>
+  <style>
+    body { background: var(--color-neutral-900); }
+    .gallery { display: flex; flex-wrap: wrap; gap: 40px; padding: 40px; align-items: flex-start; }
+    .col { display: flex; flex-direction: column; gap: 12px; }
+    .label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-neutral-400); display: flex; align-items: center; gap: 8px; }
+    .label .n { width: 20px; height: 20px; border-radius: 50%; background: var(--color-accent-800); color: var(--color-accent-100); display: flex; align-items: center; justify-content: center; font-size: 10px; }
+    .screen { width: 390px; height: 844px; background: var(--color-bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; display: flex; flex-direction: column; }
+    .top { flex: none; padding: 16px 16px 12px; display: flex; align-items: center; gap: 10px; }
+    .scroll { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+    .bottomnav { flex: none; display: flex; border-top: 1px solid var(--color-divider); padding: 8px 4px 10px; }
+    .navitem { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10.5px; color: var(--color-neutral-500); position: relative; }
+    .navitem.active { color: var(--color-accent); }
+    .navitem i { font-size: 20px; }
+    .badge { position: absolute; top: -3px; right: 22%; background: var(--color-accent); color: var(--color-bg); font-size: 9px; min-width: 15px; height: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+    .prodgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pcard { padding: 8px; gap: 6px; }
+    .pname { font-size: 12.5px; line-height: 1.3; }
+    .pprice { font-size: 13px; font-weight: 600; font-family: var(--font-heading); }
+    .pshop { font-size: 10.5px; color: var(--color-neutral-500); }
+    .chiprow { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+    .chip { flex: none; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--color-divider); font-size: 12.5px; color: var(--color-neutral-300); white-space: nowrap; }
+    .chip.active { border-color: var(--color-accent); color: var(--color-accent); }
+    .filterrow { display: flex; gap: 8px; margin: 10px 0 14px; }
+    .filterchip { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--color-divider); font-size: 12px; color: var(--color-neutral-300); }
+    .pagerow { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 14px; }
+    .pagebtn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); font-size: 12.5px; color: var(--color-neutral-400); }
+    .pagebtn.active { background: var(--color-accent-800); color: var(--color-accent-100); }
+    .backrow { display: flex; align-items: center; gap: 12px; }
+    .backrow i { font-size: 20px; }
+    .cartrow { display: flex; gap: 10px; padding: 12px 0; }
+    .cartrow + .cartrow { border-top: 1px solid transparent; background: linear-gradient(to right, transparent, var(--color-divider) 24px, var(--color-divider) calc(100% - 24px), transparent) no-repeat top / 100% 1px; }
+    .qty { display: flex; align-items: center; gap: 8px; border: 1px solid var(--color-divider); border-radius: var(--radius-sm); padding: 2px 6px; }
+    .qty button { background: none; border: none; color: var(--color-text); font-size: 14px; width: 18px; }
+    .timeline { display: flex; flex-direction: column; }
+    .tstep { display: flex; gap: 12px; }
+    .tdot { width: 10px; height: 10px; border-radius: 50%; background: var(--color-neutral-700); flex: none; margin-top: 4px; position: relative; }
+    .tstep.done .tdot, .tstep.current .tdot { background: var(--color-accent); }
+    .tline { width: 1px; background: var(--color-neutral-700); flex: 1; margin: 2px 0; margin-left: 4.5px; }
+    .tstep.done .tline { background: var(--color-accent-700); }
+    .orderrow { padding: 12px 0; display: flex; flex-direction: column; gap: 4px; background: linear-gradient(to right, transparent, var(--color-divider) 0px, var(--color-divider) 100%, transparent) no-repeat bottom / 100% 1px; }
+    .prow { display: flex; justify-content: space-between; font-size: 13px; }
+    .avatar { width: 56px; height: 56px; border-radius: 50%; }
+    .listitem { display: flex; align-items: center; gap: 12px; padding: 13px 0; font-size: 13.5px; }
+    .listitem i:first-child { font-size: 18px; color: var(--color-neutral-400); }
+    .listitem i:last-child { margin-left: auto; color: var(--color-neutral-600); }
+  </style>
+</helmet>
+
+<div class="gallery">
+
+<div class="col">
+  <div class="label"><span class="n">1</span>Accueil / Catalogue</div>
+  <div class="screen">
+    <div class="top">
+      <div class="input" style="display:flex;align-items:center;gap:8px;flex:1"><i class="ph ph-magnifying-glass" style="color:var(--color-neutral-500)"></i><span style="color:var(--color-neutral-500);font-size:13px">Rechercher un produit…</span></div>
+      <div class="btn-icon" style="display:flex;align-items:center;justify-content:center;color:var(--color-accent)"><i class="ph ph-bell"></i></div>
+    </div>
+    <div class="scroll">
+      <div class="chiprow">
+        <div class="chip active">Tout</div>
+        <div class="chip">Mode</div>
+        <div class="chip">Électronique</div>
+        <div class="chip">Maison</div>
+        <div class="chip">Beauté</div>
+        <div class="chip">Alimentation</div>
+      </div>
+      <div class="filterrow">
+        <div class="filterchip">Catégorie <i class="ph ph-caret-down"></i></div>
+        <div class="filterchip">Prix <i class="ph ph-caret-down"></i></div>
+        <div class="filterchip">En stock <i class="ph ph-caret-down"></i></div>
+      </div>
+      <div class="prodgrid">
+        <div class="card pcard">
+          <image-slot id="p1" shape="rounded" radius="8" style="width:100%;height:110px" placeholder="Photo produit"></image-slot>
+          <div class="pname">Robe wax imprimée</div>
+          <div class="pprice">185 000 GNF</div>
+          <div class="pshop">Boutique Fatou Mode</div>
+        </div>
+        <div class="card pcard">
+          <image-slot id="p2" shape="rounded" radius="8" style="width:100%;height:110px" placeholder="Photo produit"></image-slot>
+          <div class="pname">Écouteurs sans fil</div>
+          <div class="pprice">320 000 GNF</div>
+          <div class="pshop">Conakry Électro</div>
+        </div>
+        <div class="card pcard">
+          <image-slot id="p3" shape="rounded" radius="8" style="width:100%;height:110px" placeholder="Photo produit"></image-slot>
+          <div class="pname">Bouilloire électrique</div>
+          <div class="pprice">210 000 GNF</div>
+          <div class="pshop">Maison &amp; Cuisine GN</div>
+        </div>
+        <div class="card pcard">
+          <image-slot id="p4" shape="rounded" radius="8" style="width:100%;height:110px" placeholder="Photo produit"></image-slot>
+          <div class="pname">Sandales homme cuir</div>
+          <div class="pprice">95 000 GNF</div>
+          <div class="pshop">Chaussures Kaloum</div>
+        </div>
+      </div>
+      <div class="pagerow">
+        <div class="pagebtn"><i class="ph ph-caret-left"></i></div>
+        <div class="pagebtn active">1</div>
+        <div class="pagebtn">2</div>
+        <div class="pagebtn">3</div>
+        <div class="pagebtn"><i class="ph ph-caret-right"></i></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="navitem active"><i class="ph ph-house"></i>Accueil</div>
+      <div class="navitem"><i class="ph ph-shopping-cart"></i>Panier<span class="badge">3</span></div>
+      <div class="navitem"><i class="ph ph-package"></i>Commandes</div>
+      <div class="navitem"><i class="ph ph-user"></i>Profil</div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">2</span>Fiche produit</div>
+  <div class="screen">
+    <div class="top backrow">
+      <i class="ph ph-arrow-left"></i>
+      <div style="flex:1"></div>
+      <i class="ph ph-heart"></i>
+      <i class="ph ph-share-network"></i>
+    </div>
+    <div class="scroll">
+      <image-slot id="pd-main" shape="rounded" radius="10" style="width:100%;height:280px" placeholder="Photo produit"></image-slot>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <image-slot id="pd-t1" shape="rounded" radius="6" style="width:56px;height:56px" placeholder=""></image-slot>
+        <image-slot id="pd-t2" shape="rounded" radius="6" style="width:56px;height:56px" placeholder=""></image-slot>
+        <image-slot id="pd-t3" shape="rounded" radius="6" style="width:56px;height:56px" placeholder=""></image-slot>
+      </div>
+      <div style="margin-top:16px">
+        <h3 style="margin-bottom:4px">Robe wax imprimée</h3>
+        <div style="font-size:11px;color:var(--color-neutral-500);margin-bottom:8px">Vendu par <a href="#" style="color:var(--color-accent)">Boutique Fatou Mode</a></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span style="font-family:var(--font-heading);font-size:22px;font-weight:600">185 000 GNF</span>
+          <span class="tag tag-accent">En stock</span>
+        </div>
+        <div class="field" style="margin-bottom:14px">
+          <label>Quantité</label>
+          <div class="qty" style="width:fit-content"><button>−</button><span style="min-width:20px;text-align:center;font-size:13px">1</span><button>+</button></div>
+        </div>
+        <hr class="hr">
+        <h5>Description</h5>
+        <p class="text-muted" style="font-size:13px">Robe traditionnelle en tissu wax, coupe ajustée, disponible en plusieurs tailles. Livrée depuis Conakry sous 2 à 4 jours.</p>
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-size:12px;color:var(--color-neutral-500)">
+          <i class="ph ph-map-pin" style="margin-top:1px"></i>
+          <span>Livraison par zone/quartier avec point de repère — pas d'adresse postale requise</span>
+        </div>
+      </div>
+    </div>
+    <div class="bottomnav" style="border-top:1px solid var(--color-divider)">
+      <button class="btn btn-primary btn-block" style="margin:0">Ajouter au panier — 185 000 GNF</button>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">3</span>Panier multi-boutiques</div>
+  <div class="screen">
+    <div class="top backrow"><i class="ph ph-arrow-left"></i><h5 style="margin:0">Mon panier (3 articles)</h5></div>
+    <div class="scroll">
+      <div class="cartrow">
+        <image-slot id="c1" shape="rounded" radius="6" style="width:64px;height:64px" placeholder=""></image-slot>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px">Robe wax imprimée</div>
+          <div style="font-size:10.5px;color:var(--color-neutral-500)">Boutique Fatou Mode</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <div class="qty"><button>−</button><span style="font-size:12px">1</span><button>+</button></div>
+            <span style="font-size:13px;font-weight:600">185 000 GNF</span>
+          </div>
+        </div>
+        <i class="ph ph-x" style="color:var(--color-neutral-600);font-size:14px"></i>
+      </div>
+      <div class="cartrow">
+        <image-slot id="c2" shape="rounded" radius="6" style="width:64px;height:64px" placeholder=""></image-slot>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px">Écouteurs sans fil</div>
+          <div style="font-size:10.5px;color:var(--color-neutral-500)">Conakry Électro</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <div class="qty"><button>−</button><span style="font-size:12px">1</span><button>+</button></div>
+            <span style="font-size:13px;font-weight:600">320 000 GNF</span>
+          </div>
+        </div>
+        <i class="ph ph-x" style="color:var(--color-neutral-600);font-size:14px"></i>
+      </div>
+      <div class="cartrow">
+        <image-slot id="c3" shape="rounded" radius="6" style="width:64px;height:64px" placeholder=""></image-slot>
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:13px">Sandales homme cuir</div>
+          <div style="font-size:10.5px;color:var(--color-neutral-500)">Chaussures Kaloum</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+            <div class="qty"><button>−</button><span style="font-size:12px">1</span><button>+</button></div>
+            <span style="font-size:13px;font-weight:600">95 000 GNF</span>
+          </div>
+        </div>
+        <i class="ph ph-x" style="color:var(--color-neutral-600);font-size:14px"></i>
+      </div>
+      <hr class="hr">
+      <div class="prow"><span class="text-muted">Sous-total</span><span>600 000 GNF</span></div>
+      <div class="prow" style="margin-top:6px"><span class="text-muted">Livraison (estimée)</span><span>À définir à l'étape suivante</span></div>
+      <div class="prow" style="margin-top:10px;font-size:16px;font-weight:600"><span>Total</span><span>600 000 GNF</span></div>
+    </div>
+    <div class="bottomnav" style="border-top:1px solid var(--color-divider)">
+      <button class="btn btn-primary btn-block" style="margin:0">Passer à la livraison</button>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">4</span>Livraison</div>
+  <div class="screen">
+    <div class="top backrow"><i class="ph ph-arrow-left"></i><h5 style="margin:0">Adresse de livraison</h5></div>
+    <div class="scroll">
+      <div class="field" style="margin-bottom:14px">
+        <label>Zone / quartier + point de repère</label>
+        <textarea class="input" rows="3" placeholder="Ex: Kaloum, près du marché central">Kaloum, près du marché central</textarea>
+      </div>
+      <div class="field" style="margin-bottom:14px">
+        <label>Nom du destinataire</label>
+        <input class="input" placeholder="Ex: Mamadou Diallo">
+      </div>
+      <div class="field" style="margin-bottom:14px">
+        <label>Téléphone</label>
+        <input class="input" placeholder="+224 6XX XX XX XX">
+      </div>
+      <div class="field" style="margin-bottom:14px">
+        <label>Instructions supplémentaires (optionnel)</label>
+        <textarea class="input" rows="2" placeholder="Ex: Appeler avant d'arriver"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--color-neutral-500)">
+        <i class="ph ph-info" style="margin-top:1px"></i>
+        <span>Aucune adresse postale requise — décrivez simplement l'endroit avec un repère connu.</span>
+      </div>
+    </div>
+    <div class="bottomnav" style="border-top:1px solid var(--color-divider)">
+      <button class="btn btn-primary btn-block" style="margin:0">Continuer</button>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">5</span>Récapitulatif &amp; confirmation</div>
+  <div class="screen" style="position:relative">
+    <div class="top backrow"><i class="ph ph-arrow-left"></i><h5 style="margin:0">Récapitulatif</h5></div>
+    <div class="scroll">
+      <h6 style="color:var(--color-neutral-500)">Articles (3)</h6>
+      <div class="prow"><span>Robe wax imprimée</span><span>185 000 GNF</span></div>
+      <div class="prow" style="margin-top:6px"><span>Écouteurs sans fil</span><span>320 000 GNF</span></div>
+      <div class="prow" style="margin-top:6px"><span>Sandales homme cuir</span><span>95 000 GNF</span></div>
+      <hr class="hr">
+      <h6 style="color:var(--color-neutral-500)">Livraison</h6>
+      <p style="font-size:13px;margin-top:4px">Kaloum, près du marché central<br><span class="text-muted">Mamadou Diallo · +224 6XX XX XX XX</span></p>
+      <hr class="hr">
+      <h6 style="color:var(--color-neutral-500)">Paiement</h6>
+      <label class="radio" style="margin-top:6px"><input type="radio" name="pay" checked><span class="dot"></span>Paiement à la livraison</label>
+      <label class="radio" style="margin-top:10px;opacity:.5"><input type="radio" name="pay" disabled><span class="dot"></span>NimbaPay <span class="tag tag-neutral" style="margin-left:6px">Bientôt disponible</span></label>
+      <hr class="hr">
+      <div class="prow"><span class="text-muted">Sous-total</span><span>600 000 GNF</span></div>
+      <div class="prow" style="margin-top:6px"><span class="text-muted">Livraison</span><span>25 000 GNF</span></div>
+      <div class="prow" style="margin-top:10px;font-size:17px;font-weight:600"><span>Total</span><span>625 000 GNF</span></div>
+    </div>
+    <div class="bottomnav" style="border-top:1px solid var(--color-divider)">
+      <button class="btn btn-primary btn-block" style="margin:0">Confirmer la commande</button>
+    </div>
+    <div class="dialog-backdrop" style="position:absolute;border-radius:var(--radius-lg)">
+      <div class="dialog" style="text-align:center;align-items:center">
+        <i class="ph ph-check-circle" style="font-size:44px;color:var(--color-accent)"></i>
+        <div class="dialog-title">Commande confirmée</div>
+        <div class="dialog-body">Commande #GN-10234 · Paiement à la livraison<br>Vous serez contacté avant la livraison.</div>
+        <div class="dialog-actions" style="width:100%">
+          <button class="btn btn-secondary" style="flex:1">Continuer mes achats</button>
+          <button class="btn btn-primary" style="flex:1">Voir ma commande</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">6</span>Liste des commandes</div>
+  <div class="screen">
+    <div class="top"><h5 style="margin:0">Mes commandes</h5></div>
+    <div class="scroll">
+      <div class="seg" style="margin-bottom:12px">
+        <label class="seg-opt"><input type="radio" name="ordertab" checked>En cours</label>
+        <label class="seg-opt"><input type="radio" name="ordertab">Terminées</label>
+      </div>
+      <div class="orderrow">
+        <div class="prow"><span style="font-weight:600">#GN-10234</span><span class="tag tag-accent">En préparation</span></div>
+        <div class="text-muted" style="font-size:12px">8 août 2026 · 3 articles · 2 boutiques</div>
+        <div class="prow" style="margin-top:2px"><span class="text-muted">Total</span><span>625 000 GNF</span></div>
+      </div>
+      <div class="orderrow">
+        <div class="prow"><span style="font-weight:600">#GN-10198</span><span class="tag tag-neutral">Expédiée</span></div>
+        <div class="text-muted" style="font-size:12px">3 août 2026 · 1 article · 1 boutique</div>
+        <div class="prow" style="margin-top:2px"><span class="text-muted">Total</span><span>320 000 GNF</span></div>
+      </div>
+      <div class="orderrow">
+        <div class="prow"><span style="font-weight:600">#GN-10102</span><span class="tag tag-outline">Livrée</span></div>
+        <div class="text-muted" style="font-size:12px">28 juillet 2026 · 2 articles · 1 boutique</div>
+        <div class="prow" style="margin-top:2px"><span class="text-muted">Total</span><span>210 000 GNF</span></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="navitem"><i class="ph ph-house"></i>Accueil</div>
+      <div class="navitem"><i class="ph ph-shopping-cart"></i>Panier</div>
+      <div class="navitem active"><i class="ph ph-package"></i>Commandes</div>
+      <div class="navitem"><i class="ph ph-user"></i>Profil</div>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">7</span>Détail commande / suivi</div>
+  <div class="screen">
+    <div class="top backrow"><i class="ph ph-arrow-left"></i><h5 style="margin:0">Commande #GN-10234</h5></div>
+    <div class="scroll">
+      <div class="timeline" style="margin:8px 0 18px">
+        <div style="display:flex;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center;width:10px;flex:none"><div class="tdot" style="background:var(--color-accent)"></div><div class="tline" style="width:1px;flex:1;background:var(--color-accent-700)"></div></div>
+          <div style="padding-bottom:16px"><div style="font-size:13px">Commande reçue</div><div class="text-muted" style="font-size:11px">8 août, 09:12</div></div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center;width:10px;flex:none"><div class="tdot" style="background:var(--color-accent)"></div><div class="tline" style="width:1px;flex:1;background:var(--color-neutral-700)"></div></div>
+          <div style="padding-bottom:16px"><div style="font-size:13px;color:var(--color-accent)">En préparation</div><div class="text-muted" style="font-size:11px">Boutique Fatou Mode</div></div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center;width:10px;flex:none"><div class="tdot"></div><div class="tline" style="width:1px;flex:1;background:var(--color-neutral-700)"></div></div>
+          <div style="padding-bottom:16px"><div style="font-size:13px;color:var(--color-neutral-500)">En livraison</div></div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div style="display:flex;flex-direction:column;align-items:center;width:10px;flex:none"><div class="tdot"></div></div>
+          <div><div style="font-size:13px;color:var(--color-neutral-500)">Livrée</div></div>
+        </div>
+      </div>
+      <hr class="hr">
+      <h6 style="color:var(--color-neutral-500)">Articles</h6>
+      <div class="prow"><span>Robe wax imprimée</span><span>185 000 GNF</span></div>
+      <div class="prow" style="margin-top:6px"><span>Écouteurs sans fil</span><span>320 000 GNF</span></div>
+      <hr class="hr">
+      <h6 style="color:var(--color-neutral-500)">Livraison</h6>
+      <p style="font-size:13px;margin-top:4px">Kaloum, près du marché central</p>
+      <hr class="hr">
+      <h6 style="color:var(--color-neutral-500)">Paiement</h6>
+      <p style="font-size:13px;margin-top:4px">Paiement à la livraison</p>
+      <div class="prow" style="margin-top:10px;font-size:16px;font-weight:600"><span>Total</span><span>625 000 GNF</span></div>
+      <button class="btn btn-ghost" style="margin-top:16px"><i class="ph ph-chat-circle"></i>Contacter le support</button>
+    </div>
+  </div>
+</div>
+
+<div class="col">
+  <div class="label"><span class="n">8</span>Profil</div>
+  <div class="screen">
+    <div class="top"><h5 style="margin:0">Profil</h5></div>
+    <div class="scroll">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 0 16px">
+        <div class="avatar" style="background:var(--color-accent-800);display:flex;align-items:center;justify-content:center;color:var(--color-accent-100);font-family:var(--font-heading);font-size:20px">MD</div>
+        <div><div style="font-size:15px">Mamadou Diallo</div><div class="text-muted" style="font-size:12.5px">+224 6XX XX XX XX</div></div>
+      </div>
+      <hr class="hr" style="margin:0 0 4px">
+      <div class="listitem"><i class="ph ph-map-pin"></i>Mes adresses<i class="ph ph-caret-right"></i></div>
+      <div class="listitem"><i class="ph ph-package"></i>Mes commandes<i class="ph ph-caret-right"></i></div>
+      <div class="listitem"><i class="ph ph-credit-card"></i>Paiement <span class="tag tag-neutral" style="margin-left:6px">NimbaPay bientôt</span><i class="ph ph-caret-right"></i></div>
+      <div class="listitem"><i class="ph ph-bell"></i>Notifications<i class="ph ph-caret-right"></i></div>
+      <div class="listitem"><i class="ph ph-question"></i>Aide &amp; support<i class="ph ph-caret-right"></i></div>
+      <hr class="hr" style="margin:8px 0">
+      <div class="listitem" style="color:var(--color-accent-300)"><i class="ph ph-sign-out" style="color:var(--color-accent-300)"></i>Se déconnecter</div>
+    </div>
+    <div class="bottomnav">
+      <div class="navitem"><i class="ph ph-house"></i>Accueil</div>
+      <div class="navitem"><i class="ph ph-shopping-cart"></i>Panier</div>
+      <div class="navitem"><i class="ph ph-package"></i>Commandes</div>
+      <div class="navitem active"><i class="ph ph-user"></i>Profil</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

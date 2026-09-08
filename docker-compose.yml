@@ -89,7 +89,8 @@ services:
       minio:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
+networks:
+  - dokploy-network
 networks:
   dokploy-network:
     external: true
